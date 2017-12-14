@@ -5,8 +5,8 @@
  */
 
 (function(factory){
-    if (typeof define === "function" && define.amd) {
-        define(["jquery"], factory);
+    if (typeof define === 'function' && define.amd) {
+        define(['jquery'], factory);
     } else if (typeof exports === 'object') {
         factory(require('jquery'));
     } else {
@@ -346,7 +346,8 @@
                 paste: $.proxy(this.paste, this)
             };
 
-            if (this.o.showOnFocus === true) {
+            if (this.o.showOnFocus === true && this.o.buttonOnly === false) {
+
                 events.focus = $.proxy(this.show, this);
             }
 
@@ -361,7 +362,14 @@
                     // For components that are not readonly, allow keyboard nav
                     [this.inputField, events],
                     [this.component, {
-                        click: $.proxy(this.show, this)
+                        click: $.proxy(function(e) {
+                        	console.log(e);
+                        	// if (this.o.buttonOnly === true) {
+                        	console.log(this);
+                        		this.show();
+                        	// }
+
+                        }, this)
                     }]
                 ];
             }
@@ -1141,10 +1149,6 @@
 				nextIsDisabled,
 				factor = 1;
 			switch (this.viewMode){
-				case 0:
-					prevIsDisabled = year <= startYear && month <= startMonth;
-					nextIsDisabled = year >= endYear && month >= endMonth;
-					break;
 				case 4:
 					factor *= 10;
 					/* falls through */
@@ -1155,8 +1159,12 @@
 					factor *= 10;
 					/* falls through */
 				case 1:
-					prevIsDisabled = Math.floor(year / factor) * factor <= startYear;
-					nextIsDisabled = Math.floor(year / factor) * factor + factor >= endYear;
+					prevIsDisabled = Math.floor(year / factor) * factor < startYear;
+					nextIsDisabled = Math.floor(year / factor) * factor + factor > endYear;
+					break;
+				case 0:
+					prevIsDisabled = year <= startYear && month < startMonth;
+					nextIsDisabled = year >= endYear && month > endMonth;
 					break;
 			}
 
@@ -1389,7 +1397,7 @@
 
 		keydown: function(e){
 			if (!this.picker.is(':visible')){
-				if (e.keyCode === 40 || e.keyCode === 27) { // allow down to re-show picker
+				if (!this.o.buttonOnly && (e.keyCode === 40 || e.keyCode === 27)) { // allow down to re-show picker
 					this.show();
 					e.stopPropagation();
         }
@@ -1530,6 +1538,11 @@
 			});
 			$.each(this.pickers, function(i, p){
 				p.setRange(range);
+			});
+		},
+		clearDates: function(){
+			$.each(this.pickers, function(i, p){
+				p.clearDates();
 			});
 		},
 		dateUpdated: function(e){
@@ -1699,6 +1712,7 @@
 		disableTouchKeyboard: false,
 		enableOnReadonly: true,
 		showOnFocus: true,
+		buttonOnly: false,
 		zIndexOffset: 10,
 		container: 'body',
 		immediateUpdates: false,

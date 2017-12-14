@@ -359,7 +359,8 @@
                 paste: $.proxy(this.paste, this)
             };
 
-            if (this.o.showOnFocus === true) {
+            if (this.o.showOnFocus === true && this.o.buttonOnly === false) {
+
                 events.focus = $.proxy(this.show, this);
             }
 
@@ -374,7 +375,14 @@
                     // For components that are not readonly, allow keyboard nav
                     [this.inputField, events],
                     [this.component, {
-                        click: $.proxy(this.show, this)
+                        click: $.proxy(function(e) {
+                        	console.log(e);
+                        	// if (this.o.buttonOnly === true) {
+                        	console.log(this);
+                        		this.show();
+                        	// }
+
+                        }, this)
                     }]
                 ];
             }
@@ -1402,7 +1410,7 @@
 
 		keydown: function(e){
 			if (!this.picker.is(':visible')){
-				if (e.keyCode === 40 || e.keyCode === 27) { // allow down to re-show picker
+				if (!this.o.buttonOnly && (e.keyCode === 40 || e.keyCode === 27)) { // allow down to re-show picker
 					this.show();
 					e.stopPropagation();
         }
@@ -1717,6 +1725,7 @@
 		disableTouchKeyboard: false,
 		enableOnReadonly: true,
 		showOnFocus: true,
+		buttonOnly: false,
 		zIndexOffset: 10,
 		container: 'body',
 		immediateUpdates: false,
